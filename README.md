@@ -2,6 +2,10 @@
 
 My solutions to the "Advent of Code 2021" riddles using Kotlin 1.6 and Java 17.
 
+**Inputs are not provided** [as requested by the AoC author](https://twitter.com/ericwastl/status/1465805354214830081).
+They should be placed under `src/main/resources/days/DayXX.txt` where `XX` is
+substituted with the respective day (e.g. `Day01.txt` for day 1).
+
 
 ## License
 

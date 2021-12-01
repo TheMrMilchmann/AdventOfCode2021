@@ -5,3 +5,6 @@
 !/.idea/scopes
 /build
 /out
+
+# https://twitter.com/ericwastl/status/1465805354214830081
+/src/main/resources/days/Day*.txt
