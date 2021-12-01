@@ -21,7 +21,7 @@
  */
 package days
 
-import utils.readInput
+import utils.*
 
 fun main() {
     val depths = readInput().map(String::toInt)
