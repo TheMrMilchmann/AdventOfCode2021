@@ -27,4 +27,5 @@ fun main() {
     val depths = readInput().map(String::toInt)
 
     println("Part 1: ${depths.zipWithNext().count { (a, b) -> a < b }}")
+    println("Part 2: ${depths.windowed(size = 3).map { it.sum() }.zipWithNext().count { (a, b) -> a < b }}")
 }
