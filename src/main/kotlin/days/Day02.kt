@@ -30,11 +30,13 @@ fun main() {
         var verticalPos = 0
         var horizontalPos = 0
 
-        for ((instruction, amount) in commands.map { it.split(" ") }) {
+        for ((instruction, y) in commands.map { it.split(" ") }) {
+            val amount = y.toInt()
+
             when (instruction) {
-                "forward" -> horizontalPos += amount.toInt()
-                "down" -> verticalPos += amount.toInt()
-                "up" -> verticalPos -= amount.toInt()
+                "forward" -> horizontalPos += amount
+                "down" -> verticalPos += amount
+                "up" -> verticalPos -= amount
             }
         }
 
