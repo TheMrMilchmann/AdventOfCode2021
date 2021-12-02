@@ -41,5 +41,27 @@ fun main() {
         return verticalPos * horizontalPos
     }
 
+    fun part2(): Int {
+        var verticalPos = 0
+        var horizontalPos = 0
+        var aim = 0
+
+        for ((instruction, y) in commands.map { it.split(" ") }) {
+            val amount = y.toInt()
+
+            when (instruction) {
+                "forward" -> {
+                    horizontalPos += amount
+                    verticalPos += aim * amount
+                }
+                "down" -> aim += amount
+                "up" -> aim -= amount
+            }
+        }
+
+        return verticalPos * horizontalPos
+    }
+
     println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
