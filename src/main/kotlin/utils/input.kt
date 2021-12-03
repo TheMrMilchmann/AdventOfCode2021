@@ -27,8 +27,6 @@ fun readInput(): List<String> {
     val clazz = StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE).callerClass
     val resourceName = "${clazz.name.replace('.', '/').removeSuffix("Kt")}.txt"
 
-    println(resourceName)
-
     return InputStreamReader(Res::class.java.classLoader.getResourceAsStream(resourceName) ?: error("Could not find resource $resourceName")).use { it.readLines() }
 }
 
