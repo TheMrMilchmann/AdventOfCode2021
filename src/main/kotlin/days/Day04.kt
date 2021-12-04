@@ -81,8 +81,6 @@ fun main() {
                 for (card in cardsByNumber[drawnNumber] ?: emptyList()) {
                     if (card.mark(drawnNumber)) {
                         if (card.isComplete) {
-                            println(card)
-
                             return@let drawnNumber to card
                         }
                     }
@@ -93,9 +91,41 @@ fun main() {
         }
 
         val unmarkedSum = winningCard.entries.filter { (_, marked) -> !marked }.sumOf(CardEntry::number)
+        return unmarkedSum * drawnNumber
+    }
 
+    fun part2(): Int {
+        val (drawnNumbers, cards) = parseInput()
+
+        val cardsByNumber = buildMap<Int, MutableList<BingoCard>> {
+            cards.forEach { card -> card.rows.forEach { column -> column.forEach { (number, _) -> computeIfAbsent(number) { mutableListOf() }.add(card) } } }
+        }
+
+        val incompleteCards = ArrayList<BingoCard>(cards)
+
+        val drawnNumber = Unit.let {
+            for (drawnNumber in drawnNumbers) {
+                for (card in (cardsByNumber[drawnNumber] ?: emptyList()).filter { it in incompleteCards }) {
+                    if (card.mark(drawnNumber)) {
+                        if (card.isComplete) {
+                            if (incompleteCards.size == 1) {
+                                return@let drawnNumber
+                            } else {
+                                incompleteCards.remove(card)
+                            }
+                        }
+                    }
+                }
+            }
+
+            error("No card 'won' last")
+        }
+
+        val losingCard = incompleteCards.single()
+        val unmarkedSum = losingCard.entries.filter { (_, marked) -> !marked }.sumOf(CardEntry::number)
         return unmarkedSum * drawnNumber
     }
 
     println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
