@@ -24,18 +24,25 @@ package days
 import utils.readInput
 
 fun main() {
-    val fish = readInput().single().split(",").map(String::toInt)
+    val input = readInput().single()
+        .split(",")
+        .map(String::toInt)
+        .groupingBy { it }
+        .eachCount()
 
-    fun List<Int>.advanceDay(): List<Int> = flatMap {
-        sequence {
-            when (it) {
-                0 -> {
-                    yield(6)
-                    yield(8)
-                }
-                else -> yield(it - 1)
-            }
+    val fish = buildList {
+        for (i in 0..8) {
+            add(input.getOrDefault(i, 0).toLong())
         }
+    }
+
+    fun List<Long>.advanceDay(): List<Long> {
+        val numberOfZeros = first()
+
+        return zipWithNext()
+            .mapIndexed { index, (_, value) ->
+                if (index == 6) value + numberOfZeros else value
+            } + numberOfZeros
     }
 
     fun <E> List<E>.repeat(times: Int, op: (List<E>) -> List<E>): List<E> {
@@ -47,5 +54,6 @@ fun main() {
         return res
     }
 
-    println("Part 1: ${fish.repeat(80) { it.advanceDay() }.count()}")
+    println("Part 1: ${fish.repeat(80) { it.advanceDay() }.sum()}")
+    println("Part 2: ${fish.repeat(256) { it.advanceDay() }.sum()}")
 }
