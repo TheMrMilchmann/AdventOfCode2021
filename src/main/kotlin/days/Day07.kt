@@ -29,6 +29,8 @@ fun main() {
         .split(",")
         .map(String::toInt)
 
-    println("Part 1: ${crabs.minOf { target -> crabs.sumOf { (it - target).absoluteValue } }}")
-    println("Part 2: ${(crabs.minOf { it }..crabs.maxOf { it }).minOf { target -> crabs.sumOf { (1..(it - target).absoluteValue).sum() } }}")
+    val potentialTargets = (crabs.minOf { it }..crabs.maxOf { it })
+
+    println("Part 1: ${potentialTargets.minOf { target -> crabs.sumOf { (it - target).absoluteValue } }}")
+    println("Part 2: ${potentialTargets.minOf { target -> crabs.sumOf { (1..(it - target).absoluteValue).sum() } }}")
 }
