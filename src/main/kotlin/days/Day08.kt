@@ -31,7 +31,7 @@ fun main() {
         Data(i.split(" ").map { it.toSet() }, o.split(" ").map { it.toSet() })
     }
 
-    fun Data.solve(): List<Int> {
+    fun Data.solve(): Int {
         /*
          * Segments/Digits
          * - 2 => 1
@@ -58,22 +58,23 @@ fun main() {
         val zero = sixSegmentsDigits.single { it != six && it != nine }
         val two = fiveSegmentsDigits.single { it != three && it != five }
 
-        return output.map {
+        return output.joinToString(separator = "") {
             when (it) {
-                zero -> 0
-                one -> 1
-                two -> 2
-                three -> 3
-                four -> 4
-                five -> 5
-                six -> 6
-                seven -> 7
-                eight -> 8
-                nine -> 9
+                zero -> "0"
+                one -> "1"
+                two -> "2"
+                three -> "3"
+                four -> "4"
+                five -> "5"
+                six -> "6"
+                seven -> "7"
+                eight -> "8"
+                nine -> "9"
                 else -> error("")
             }
-        }
+        }.toInt()
     }
 
-    println("Part 1: ${data.map { it.solve() }.flatten().count { it == 1 || it == 4 || it == 7 || it == 8 }}")
+    println("Part 1: ${data.sumOf { it.solve().toString().map(Char::digitToInt).count { it == 1 || it == 4 || it == 7 || it == 8 } }}")
+    println("Part 2: ${data.sumOf { it.solve() }}")
 }
