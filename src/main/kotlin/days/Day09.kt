@@ -24,20 +24,42 @@ package days
 import utils.readInput
 
 fun main() {
-    data class Point(val x: Int, val y: Int, val height: Int)
+    data class Point(val x: Int, val y: Int)
 
     val columns = readInput().map { it.toList().map(Char::digitToInt) }
 
-    val width = columns.first().size
-    val height = columns.size
+    val mWidth = columns.first().size
+    val mHeight = columns.size
 
     fun isLowPoint(x: Int, y: Int): Boolean =
         (y - 1 < 0 || columns[y][x] < columns[y - 1][x])
-            && (y + 1 >= height || columns[y][x] < columns[y + 1][x])
+            && (y + 1 >= mHeight || columns[y][x] < columns[y + 1][x])
             && (x - 1 < 0 || columns[y][x] < columns[y][x - 1])
-            && (x + 1 >= width || columns[y][x] < columns[y][x + 1])
+            && (x + 1 >= mWidth || columns[y][x] < columns[y][x + 1])
 
-    val lowPoints = (0 until height).flatMap { y -> (0 until width).mapNotNull { x -> if (isLowPoint(x, y)) Point(x, y, columns[y][x]) else null } }
+    val lowPoints = (0 until mHeight).flatMap { y -> (0 until mWidth).mapNotNull { x -> if (isLowPoint(x, y)) Point(x, y) else null } }
 
-    println("Part 1: ${lowPoints.sumOf { it.height + 1 }}")
+    fun Point.basinSize(): Int {
+        val visited = mutableSetOf<Point>()
+
+        val queue = ArrayDeque<Point>()
+        queue.add(this)
+
+        while (!queue.isEmpty()) {
+            val point = queue.removeFirst()
+            val (x, y) = point
+
+            if (columns[y][x] < 9 && visited.add(point)) {
+                if (y - 1 >= 0) queue.add(Point(x, y - 1))
+                if (y + 1 < mHeight) queue.add(Point(x, y + 1))
+                if (x - 1 >= 0) queue.add(Point(x - 1, y))
+                if (x + 1 < mWidth) queue.add(Point(x + 1, y))
+            }
+        }
+
+        return visited.size
+    }
+
+    println("Part 1: ${lowPoints.sumOf { (x, y) -> columns[y][x] + 1 }}")
+    println("Part 2: ${lowPoints.map(Point::basinSize).sortedDescending().take(3).reduce(Int::times)}")
 }
