@@ -27,25 +27,19 @@ import utils.*
 fun main() {
     val input = readInput()
 
-    val pointsByCharacter = mapOf(
-        ')' to 3,
-        ']' to 57,
-        '}' to 1197,
-        '>' to 25137
-    )
-
     data class Params(val line: List<Char>, val index: Int = 0)
 
     abstract class Res
 
-    class Pass(val index: Int) : Res()
-    class Fail(val firstCorruptIndex: Int) : Res()
+    data class Pass(val index: Int) : Res()
+    data class Fail(val firstCorruptIndex: Int, val char: Char) : Res()
+    data class Incomplete(val foo: List<Char>) : Res()
 
-    val foo = DeepRecursiveFunction<Params, Res?> { params ->
+    val foo = DeepRecursiveFunction<Params, Res> { params ->
         var (line, index) = params
-        if (params.index >= line.size - 1) return@DeepRecursiveFunction null
+        if (params.index > line.size - 1) return@DeepRecursiveFunction Incomplete(listOf())
 
-        val expectedClosingChar = when (line[params.index]) {
+        val expectedClosingChar = when (line[index]) {
             '(' -> ')'
             '[' -> ']'
             '{' -> '}'
@@ -56,18 +50,46 @@ fun main() {
         index = callRecursive(params.copy(index = index + 1)).let {
             when (it) {
                 is Pass -> it.index
-                else -> return@DeepRecursiveFunction it
+                is Incomplete -> return@DeepRecursiveFunction Incomplete(it.foo + expectedClosingChar)
+                is Fail -> return@DeepRecursiveFunction it
+                else -> error("Unexpected result: $it")
             }
         }
 
         val closingChar = line[index]
 
-        if (closingChar != expectedClosingChar) {
-            return@DeepRecursiveFunction Fail(index)
-        }
+        if (closingChar != expectedClosingChar)
+            return@DeepRecursiveFunction Fail(index, line[index])
 
         callRecursive(params.copy(index = index + 1))
     }
 
-    println("Part 1: ${input.mapNotNull { line -> foo.invoke(Params(line.toList()))?.let { pointsByCharacter[line[(it as Fail).firstCorruptIndex]] } }.sum()}")
+    fun part1(): Int {
+        val pointsByCharacter = mapOf(
+            ')' to 3,
+            ']' to 57,
+            '}' to 1197,
+            '>' to 25137
+        )
+
+        return input.mapNotNull { line -> foo.invoke(Params(line.toList())).let { if (it is Fail) it else null } }
+            .sumOf { pointsByCharacter[it.char] ?: error("What: ${it.char}") }
+    }
+
+    fun part2(): Long {
+        val pointsByCharacter = mapOf(
+            ')' to 1,
+            ']' to 2,
+            '}' to 3,
+            '>' to 4
+        )
+
+        return input.mapNotNull { line -> foo.invoke(Params(line.toList())).let { if (it is Incomplete) it else null } }
+            .map { it.foo.map { char -> pointsByCharacter[char]!!.toLong() }.reduce { acc, i -> acc * 5 + i } }
+            .sorted()
+            .let { it[it.size / 2] }
+    }
+
+    println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
