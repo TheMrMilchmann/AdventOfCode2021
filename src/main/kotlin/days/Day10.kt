@@ -33,9 +33,9 @@ fun main() {
 
     data class Pass(val index: Int) : Res()
     data class Fail(val firstCorruptIndex: Int, val char: Char) : Res()
-    data class Incomplete(val foo: List<Char>) : Res()
+    data class Incomplete(val completion: List<Char>) : Res()
 
-    val foo = DeepRecursiveFunction<Params, Res> { params ->
+    val parse = DeepRecursiveFunction<Params, Res> { params ->
         var (line, index) = params
         if (params.index > line.size - 1) return@DeepRecursiveFunction Incomplete(listOf())
 
@@ -50,16 +50,15 @@ fun main() {
         index = callRecursive(params.copy(index = index + 1)).let {
             when (it) {
                 is Pass -> it.index
-                is Incomplete -> return@DeepRecursiveFunction Incomplete(it.foo + expectedClosingChar)
+                is Incomplete -> return@DeepRecursiveFunction Incomplete(it.completion + expectedClosingChar)
                 is Fail -> return@DeepRecursiveFunction it
                 else -> error("Unexpected result: $it")
             }
         }
 
         val closingChar = line[index]
-
         if (closingChar != expectedClosingChar)
-            return@DeepRecursiveFunction Fail(index, line[index])
+            return@DeepRecursiveFunction Fail(index, closingChar)
 
         callRecursive(params.copy(index = index + 1))
     }
@@ -72,7 +71,7 @@ fun main() {
             '>' to 25137
         )
 
-        return input.mapNotNull { line -> foo.invoke(Params(line.toList())).let { if (it is Fail) it else null } }
+        return input.mapNotNull { line -> parse.invoke(Params(line.toList())).let { if (it is Fail) it else null } }
             .sumOf { pointsByCharacter[it.char] ?: error("What: ${it.char}") }
     }
 
@@ -84,8 +83,8 @@ fun main() {
             '>' to 4
         )
 
-        return input.mapNotNull { line -> foo.invoke(Params(line.toList())).let { if (it is Incomplete) it else null } }
-            .map { it.foo.map { char -> pointsByCharacter[char]!!.toLong() }.reduce { acc, i -> acc * 5 + i } }
+        return input.mapNotNull { line -> parse.invoke(Params(line.toList())).let { if (it is Incomplete) it else null } }
+            .map { it.completion.map { char -> pointsByCharacter[char]!!.toLong() }.reduce { acc, i -> acc * 5 + i } }
             .sorted()
             .let { it[it.size / 2] }
     }
