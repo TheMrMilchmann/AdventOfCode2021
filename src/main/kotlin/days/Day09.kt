@@ -21,45 +21,33 @@
  */
 package days
 
-import utils.readInput
+import utils.*
 
 fun main() {
-    data class Point(val x: Int, val y: Int)
+    val input = readInput().map { it.toList().map(Char::digitToInt) }.toGrid()
 
-    val columns = readInput().map { it.toList().map(Char::digitToInt) }
+    fun isLowPoint(x: HPos, y: VPos): Boolean =
+        input.getAdjacentPositions(GridPos(x, y)).all { input[x, y] < input[it] }
 
-    val mWidth = columns.first().size
-    val mHeight = columns.size
+    val lowPoints = input.horizontalIndices.flatMap { x -> input.verticalIndices.mapNotNull { y -> if (isLowPoint(x, y)) GridPos(x, y) else null } }
 
-    fun isLowPoint(x: Int, y: Int): Boolean =
-        (y - 1 < 0 || columns[y][x] < columns[y - 1][x])
-            && (y + 1 >= mHeight || columns[y][x] < columns[y + 1][x])
-            && (x - 1 < 0 || columns[y][x] < columns[y][x - 1])
-            && (x + 1 >= mWidth || columns[y][x] < columns[y][x + 1])
+    fun GridPos.basinSize(): Int {
+        val visited = mutableSetOf<GridPos>()
 
-    val lowPoints = (0 until mHeight).flatMap { y -> (0 until mWidth).mapNotNull { x -> if (isLowPoint(x, y)) Point(x, y) else null } }
-
-    fun Point.basinSize(): Int {
-        val visited = mutableSetOf<Point>()
-
-        val queue = ArrayDeque<Point>()
+        val queue = ArrayDeque<GridPos>()
         queue.add(this)
 
         while (!queue.isEmpty()) {
-            val point = queue.removeFirst()
-            val (x, y) = point
+            val pos = queue.removeFirst()
 
-            if (columns[y][x] < 9 && visited.add(point)) {
-                if (y - 1 >= 0) queue.add(Point(x, y - 1))
-                if (y + 1 < mHeight) queue.add(Point(x, y + 1))
-                if (x - 1 >= 0) queue.add(Point(x - 1, y))
-                if (x + 1 < mWidth) queue.add(Point(x + 1, y))
+            if (input[pos] < 9 && visited.add(pos)) {
+                queue.addAll(input.getAdjacentPositions(pos))
             }
         }
 
         return visited.size
     }
 
-    println("Part 1: ${lowPoints.sumOf { (x, y) -> columns[y][x] + 1 }}")
-    println("Part 2: ${lowPoints.map(Point::basinSize).sortedDescending().take(3).reduce(Int::times)}")
+    println("Part 1: ${lowPoints.sumOf { (x, y) -> input[x, y] + 1 }}")
+    println("Part 2: ${lowPoints.map(GridPos::basinSize).sortedDescending().take(3).reduce(Int::times)}")
 }
