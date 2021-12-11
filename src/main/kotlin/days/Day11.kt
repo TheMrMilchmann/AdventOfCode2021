@@ -55,6 +55,6 @@ fun main() {
 
     val data = Data(input)
 
-    println("Part 1: ${generateSequence(data) { it.computeStep() }.take(100).map { it.flashes }.sum()}")
+    println("Part 1: ${generateSequence(data) { it.computeStep() }.take(100).sumOf { it.flashes }}")
     println("Part 2: ${generateSequence(data) { it.computeStep() }.dropWhile { it.flashes != it.grid.size }.first().step}")
 }
