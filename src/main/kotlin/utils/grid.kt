@@ -51,10 +51,26 @@ fun <E> List<List<E>>.toGrid(): Grid<E> = Grid(
     width = map { it.size }.toSet().single()
 )
 
+fun <S, T> Grid<S>.map(transform: (pos: GridPos, value: S) -> T): Grid<T> = Grid(
+    grid = positions.map { pos -> transform(pos, this[pos]) },
+    width = width,
+    height = height
+)
+
+fun <S, T> Grid<S>.map(transform: (x: HPos, y: VPos, value: S) -> T): Grid<T> = Grid(
+    grid = horizontalIndices.flatMap { x -> verticalIndices.map { y -> transform(x, y, this[x, y]) } },
+    width = width,
+    height = height
+)
+
+fun <E> Grid<E>.toMap(): Map<GridPos, E> = buildMap {
+    positions.forEach { pos -> this[pos] = this@toMap[pos] }
+}
+
 class Grid<E>(
     private val grid: List<E>,
-    private val width: Int,
-    private val height: Int
+    val width: Int,
+    val height: Int
 ) {
 
     init {
@@ -63,6 +79,8 @@ class Grid<E>(
 
     val horizontalIndices: List<HPos> get() = (0 until width).map { HPos(it) }
     val verticalIndices: List<VPos> get() = (0 until height).map { VPos(it) }
+
+    val positions: List<GridPos> get() = verticalIndices.flatMap { y -> horizontalIndices.map { x -> GridPos(x, y) } }
 
     operator fun contains(pos: GridPos): Boolean =
         pos.x in horizontalIndices && pos.y in verticalIndices
@@ -87,5 +105,8 @@ class Grid<E>(
             pos.copy(x = pos.x + 1, y = pos.y + 1).also { if (it in this@Grid) add(it) }
         }
     }
+
+    override fun toString(): String =
+        grid.chunked(width).joinToString(separator = System.lineSeparator()) { it.joinToString(separator = "") }
 
 }
