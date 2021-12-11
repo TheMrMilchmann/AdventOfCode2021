@@ -81,6 +81,7 @@ class Grid<E>(
     val verticalIndices: List<VPos> get() = (0 until height).map { VPos(it) }
 
     val positions: List<GridPos> get() = verticalIndices.flatMap { y -> horizontalIndices.map { x -> GridPos(x, y) } }
+    val size: Int get() = width * height
 
     operator fun contains(pos: GridPos): Boolean =
         pos.x in horizontalIndices && pos.y in verticalIndices

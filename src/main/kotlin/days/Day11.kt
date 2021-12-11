@@ -26,7 +26,7 @@ import utils.*
 fun main() {
     val input = readInput().map { it.toList().map(Char::digitToInt) }.toGrid()
 
-    data class Data(val grid: Grid<Int>, val flashes: Int = 0)
+    data class Data(val grid: Grid<Int>, val flashes: Int = 0, val step: Int = 0)
 
     fun Data.computeStep(): Data {
         val energy = grid.toMap().mapValues { (_, v) -> v + 1 }.toMutableMap()
@@ -48,11 +48,13 @@ fun main() {
 
         return Data(
             grid = grid.map { pos, _ -> energy[pos]!! % 10 },
-            flashes = flashes + numFlashes
+            flashes = numFlashes,
+            step = step + 1
         )
     }
 
-    val data = Data(input, 0)
+    val data = Data(input)
 
-    println("Part 1: ${generateSequence(data) { it.computeStep() }.drop(100).first().flashes}")
+    println("Part 1: ${generateSequence(data) { it.computeStep() }.take(100).map { it.flashes }.sum()}")
+    println("Part 2: ${generateSequence(data) { it.computeStep() }.dropWhile { it.flashes != it.grid.size }.first().step}")
 }
