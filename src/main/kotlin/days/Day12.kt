@@ -33,12 +33,23 @@ fun main() {
     }
 
     fun String.countPaths(
-        visited: Set<String> = emptySet()
+        path: List<String> = emptyList(),
+        visited: Map<String, Int> = emptyMap(),
+        predicate: (node: String, visited: Map<String, Int>) -> Boolean
     ): Int = when (this) {
         "end" -> 1
-        else -> input[this]!!.filter { it !in visited }
-            .sumOf { it.countPaths(if (this == lowercase()) visited + this else visited) }
+        else -> {
+            @Suppress("NAME_SHADOWING")
+            val visited = if (this == lowercase())
+                visited + mapOf(this to (if (this in visited) 2 else 1))
+            else
+                visited
+
+            input[this]!!.filter { it != "start" && predicate(it, visited) }
+                .sumOf { it.countPaths(path = path + this, visited = visited, predicate = predicate) }
+        }
     }
 
-    println("Part 1: ${"start".countPaths()}")
+    println("Part 1: ${"start".countPaths { node, visited -> node !in visited } }")
+    println("Part 2: ${"start".countPaths { node, visited -> node !in visited || visited.none { (_, v) -> v == 2 } } }")
 }
