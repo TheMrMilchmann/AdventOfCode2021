@@ -54,5 +54,21 @@ fun main() {
         }(pos.toInt())
     }
 
-    println("Part 1: ${points.map { (foldInstructions.first())(it) }.toSet().size}")
+    fun part1(): Int = points.map { (foldInstructions.first())(it) }.toSet().size
+
+    fun part2(): String = buildString {
+        val finalPoints = points.map { point -> foldInstructions.fold(point) { acc, foldInstruction -> foldInstruction(acc) } }
+
+        val minX = finalPoints.minOf(Point::x)
+        val minY = finalPoints.minOf(Point::y)
+        val maxX = finalPoints.maxOf(Point::x)
+        val maxY = finalPoints.maxOf(Point::y)
+
+        return (minY..maxY).joinToString(separator = System.lineSeparator()) { y ->
+            (minX..maxX).joinToString(separator = "") { x -> if (Point(x, y) in finalPoints) "█" else " " }
+        }
+    }
+
+    println("Part 1: ${part1()}")
+    println("Part 2: \n${part2()}")
 }
