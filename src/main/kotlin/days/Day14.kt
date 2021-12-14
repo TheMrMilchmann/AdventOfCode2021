@@ -34,20 +34,20 @@ fun main() {
             valueTransform = { it[1] }
         )
 
-    fun steps(): Sequence<Map<String, Int>> =
-        generateSequence(template.windowed(size = 2).groupingBy { it }.eachCount()) { prev ->
+    fun steps(): Sequence<Map<String, Long>> =
+        generateSequence(template.windowed(size = 2).groupingBy { it }.eachCount().mapValues { (_, count) -> count.toLong() }) { prev ->
             prev.flatMap { (pair, count) ->
                 val inserted = rules[pair] ?: error("No matching rule for pattern '$pair'")
 
                 listOf("${pair[0]}$inserted" to count, "$inserted${pair[1]}" to count)
             }.groupingBy { it.first }
-                .fold(0) { acc, (_, count) -> acc + count }
+                .fold(0L) { acc, (_, count) -> acc + count }
         }
 
-    fun Map<String, Int>.eachCount(): Map<Char, Int> =
+    fun Map<String, Long>.eachCount(): Map<Char, Long> =
         flatMap { (pair, count) -> listOf(pair[0] to count, pair[1] to count) }
             .groupingBy { it.first }
-            .fold(0) { acc, (_, count) -> acc + count }
+            .fold(0L) { acc, (_, count) -> acc + count }
             .mapValues { (polymer, count) ->
                 var actualCount = count / 2
 
@@ -60,8 +60,8 @@ fun main() {
                 actualCount
             }
 
-    fun part1(): Int {
-        val counts = steps().drop(10).first().eachCount()
+    fun resultAfter(steps: Int): Long {
+        val counts = steps().drop(steps).first().eachCount()
 
         val min = counts.minOf { (_, count) -> count }
         val max = counts.maxOf { (_, count) -> count }
@@ -69,5 +69,6 @@ fun main() {
         return max - min
     }
 
-    println("Part 1: ${part1()}")
+    println("Part 1: ${resultAfter(steps = 10)}")
+    println("Part 1: ${resultAfter(steps = 40)}")
 }
