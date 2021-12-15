@@ -70,5 +70,5 @@ fun main() {
     }
 
     println("Part 1: ${resultAfter(steps = 10)}")
-    println("Part 1: ${resultAfter(steps = 40)}")
+    println("Part 2: ${resultAfter(steps = 40)}")
 }
