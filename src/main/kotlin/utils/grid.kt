@@ -21,8 +21,20 @@
  */
 package utils
 
+import java.util.*
+import kotlin.collections.*
+
+val Int.hPos: HPos get() = HPos(this)
+val Int.vPos: VPos get() = VPos(this)
+
 @JvmInline
-value class HPos(val intValue: Int) {
+value class HPos(val intValue: Int) : Comparable<HPos> {
+
+    override fun compareTo(other: HPos): Int =
+        intValue.compareTo(other.intValue)
+
+    operator fun div(value: Int): HPos =
+        HPos(intValue - value)
 
     operator fun minus(value: Int): HPos =
         HPos(intValue - value)
@@ -30,10 +42,19 @@ value class HPos(val intValue: Int) {
     operator fun plus(value: Int): HPos =
         HPos(intValue + value)
 
+    operator fun rem(value: Int): HPos =
+        HPos(intValue % value)
+
 }
 
 @JvmInline
-value class VPos(val intValue: Int) {
+value class VPos(val intValue: Int): Comparable<VPos> {
+
+    override fun compareTo(other: VPos): Int =
+        intValue.compareTo(other.intValue)
+
+    operator fun div(value: Int): VPos =
+        VPos(intValue / value)
 
     operator fun minus(value: Int): VPos =
         VPos(intValue - value)
@@ -41,9 +62,17 @@ value class VPos(val intValue: Int) {
     operator fun plus(value: Int): VPos =
         VPos(intValue + value)
 
+    operator fun rem(value: Int): VPos =
+        VPos(intValue % value)
+
 }
 
-data class GridPos(val x: HPos, val y: VPos)
+data class GridPos(val x: HPos, val y: VPos) : Comparable<GridPos> {
+
+    override fun compareTo(other: GridPos): Int =
+        compareBy(GridPos::y).thenComparing(compareBy(GridPos::x)).compare(this, other)
+
+}
 
 fun <E> List<List<E>>.toGrid(): Grid<E> = Grid(
     grid = flatten(),
@@ -77,10 +106,20 @@ class Grid<E>(
         require(grid.size == width * height)
     }
 
-    val horizontalIndices: List<HPos> get() = (0 until width).map { HPos(it) }
-    val verticalIndices: List<VPos> get() = (0 until height).map { VPos(it) }
+    constructor(width: Int, height: Int, init: (GridPos) -> E):
+        this(ArrayList<E>(width * height).apply {
+            for (i in 0 until (width * height)) {
+                val y = i / width
+                val x = i % width
 
-    val positions: List<GridPos> get() = verticalIndices.flatMap { y -> horizontalIndices.map { x -> GridPos(x, y) } }
+                add(init(GridPos(x.hPos, y.vPos)))
+            }
+        }, width, height)
+
+    val horizontalIndices: List<HPos> by lazy { (0 until width).map { HPos(it) } }
+    val verticalIndices: List<VPos> by lazy { (0 until height).map { VPos(it) } }
+
+    val positions: SortedSet<GridPos> by lazy { verticalIndices.flatMap { y -> horizontalIndices.map { x -> GridPos(x, y) } }.toSortedSet() }
     val size: Int get() = width * height
 
     operator fun contains(pos: GridPos): Boolean =

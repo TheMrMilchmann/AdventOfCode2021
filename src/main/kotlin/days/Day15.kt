@@ -26,27 +26,30 @@ import java.util.*
 
 fun main() {
     val costs = readInput().map { it.toList().map(Char::digitToInt) }.toGrid()
-    val gridPositions = costs.positions
 
-    fun calculateCost(start: Int, dest: Int): Int {
-        val risks = IntArray(gridPositions.size) { Int.MAX_VALUE }
-        risks[start] = 0
+    fun Grid<Int>.calculateCost(start: GridPos, dest: GridPos): Int {
+        fun flatIndexOf(pos: GridPos) =
+            (pos.y.intValue * width) + pos.x.intValue
 
-        val queue = PriorityQueue<Pair<Int, Int>>(compareBy { (_, cost) -> cost })
-        queue.add(0 to 0)
+        val risks = IntArray(positions.size) { Int.MAX_VALUE }
+        risks[flatIndexOf(start)] = 0
+
+        val queue = PriorityQueue<Pair<GridPos, Int>>(compareBy { (_, priority) -> priority })
+        queue.add(start to 0)
 
         while (queue.isNotEmpty()) {
-            val (index, _) = queue.poll()
-            if (index == dest) return risks[index]
+            val (pos, _) = queue.remove()
+            val index = flatIndexOf(pos)
+            if (pos == dest) return risks[index]
 
-            val pos = gridPositions[index]
+            for (vPos in getAdjacentPositions(pos)) {
+                val vIndex = flatIndexOf(vPos)
 
-            for (v in costs.getAdjacentPositions(pos).map(gridPositions::indexOf)) {
-                val alt = risks[index] + costs[gridPositions[v]]
+                val alt = risks[index] + this[vPos]
 
-                if (alt < risks[v]) {
-                    risks[v] = alt
-                    queue.add(v to alt)
+                if (alt < risks[vIndex]) {
+                    risks[vIndex] = alt
+                    queue.add(vPos to alt)
                 }
             }
         }
@@ -54,5 +57,17 @@ fun main() {
         error("Cost calculation aborted unexpectedly")
     }
 
-    println("Part 1: ${calculateCost(start = 0, dest = gridPositions.lastIndex)}")
+    fun part1() = costs.calculateCost(start = costs.positions.first(), costs.positions.last())
+
+    fun part2(): Int {
+        val actualGrid = Grid(costs.width * 5, costs.height * 5) { pos ->
+            val increase = (pos.x.intValue / costs.width) + (pos.y.intValue / costs.height)
+            ((costs[pos.x % costs.width, pos.y % costs.height] + increase - 1) % 9) + 1
+        }
+
+        return actualGrid.calculateCost(start = actualGrid.positions.first(), actualGrid.positions.last())
+    }
+
+    println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
