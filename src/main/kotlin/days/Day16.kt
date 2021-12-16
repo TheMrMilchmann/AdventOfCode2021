@@ -52,9 +52,11 @@ fun main() {
                     .joinToString(separator = "")
                     .toLong(radix = 2)
 
-                IRLiteral(version, type, literal)
+                IRLiteral(version, literal)
             }
             else -> { // Operator Packet
+                val operator = IRExpression.Operator.elements.find { it.type == type } ?: error("Unknown operator: $type")
+
                 when (val lengthTypeID = input.drop(advance).firstAndAdvance().digitToInt(radix = 2)) {
                     0 -> {
                         val totalPacketLength = input.drop(advance).takeAndAdvance(15).joinToString(separator = "").toInt(radix = 2) - 6 /* = header */ - 1 /* = lengthTypeID */
@@ -66,13 +68,13 @@ fun main() {
                             subPackets += callRecursive(Unit)
                         }
 
-                        IRExpression(version, type, subPackets)
+                        IRExpression(version, operator, subPackets)
                     }
                     1 -> {
                         val subPacketCount = input.drop(advance).takeAndAdvance(11).joinToString(separator = "").toInt(radix = 2)
                         val subPackets = (0 until subPacketCount).map { callRecursive(Unit) }
 
-                        IRExpression(version, type, subPackets)
+                        IRExpression(version, operator, subPackets)
                     }
                     else -> error("Unexpected lengthTypeID: $lengthTypeID")
                 }
@@ -87,23 +89,59 @@ fun main() {
         is IRLiteral -> version
     }
 
-    println(irElement)
     println("Part 1: ${irElement.part1()}")
+    println("Part 2: ${irElement.eval()}")
 }
 
 private sealed interface IRElement {
     val version: Int
-    val type: Int
+
+    fun eval(): Long
+
 }
 
 private data class IRExpression(
     override val version: Int,
-    override val type: Int,
+    val operator: Operator,
     val elements: List<IRElement>
-) : IRElement
+) : IRElement {
+
+    override fun eval(): Long = operator(elements)
+
+    enum class Operator(
+        val type: Int,
+        val op: (List<IRElement>) -> Long
+    ) {
+        SUM(0, { elements -> elements.sumOf { it.eval() } }),
+        PRODUCT(1, { elements -> elements.fold(1L) { acc, e -> acc * e.eval() } }),
+        MIN(2, { elements -> elements.minOf { it.eval() } }),
+        MAX(3, { elements -> elements.maxOf { it.eval() } }),
+        GT(5, { elements ->
+            check(elements.size == 2)
+            if (elements.first().eval() > elements.last().eval()) 1 else 0
+        }),
+        LT(6, { elements ->
+            check(elements.size == 2)
+            if (elements.first().eval() < elements.last().eval()) 1 else 0
+        }),
+        EQ(7, { elements ->
+            check(elements.size == 2)
+            if (elements.first().eval() == elements.last().eval()) 1 else 0
+        });
+
+        companion object {
+            val elements by lazy { values().toList() }
+        }
+
+        operator fun invoke(elements: List<IRElement>) = op(elements)
+
+    }
+
+}
 
 private data class IRLiteral(
     override val version: Int,
-    override val type: Int,
     val value: Long
-): IRElement
+): IRElement {
+    override fun eval(): Long = value
+}
