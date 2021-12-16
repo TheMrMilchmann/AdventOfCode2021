@@ -46,7 +46,7 @@ fun main() {
                 val literal = input
                     .drop(advance)
                     .chunked(5)
-                    .takeWhileWithFirstOffender { it[0] == '1' }
+                    .takeWhileInclusive { it[0] == '1' }
                     .also { advance += 5 * it.size }
                     .flatMap { it.drop(1) }
                     .joinToString(separator = "")
