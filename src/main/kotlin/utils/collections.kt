@@ -21,7 +21,7 @@
  */
 package utils
 
-public inline fun <T> Iterable<T>.takeWhileInclusive(predicate: (T) -> Boolean): List<T> {
+inline fun <T> Iterable<T>.takeWhileInclusive(predicate: (T) -> Boolean): List<T> {
     val list = ArrayList<T>()
     for (item in this) {
         list.add(item)
