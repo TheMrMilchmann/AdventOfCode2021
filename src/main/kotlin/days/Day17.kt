@@ -55,8 +55,10 @@ fun main() {
 
                     highest = maxOf(y, highest)
 
-                    if (x in targetXs && y in targetYs)
+                    if (x in targetXs && y in targetYs) {
                         yield(highest)
+                        return@loop
+                    }
 
                     if ((x < minX && vX <= 0) || (x > maxX && vX >= 0) || (y < minY && vY <= 0))
                         return@loop
@@ -66,4 +68,5 @@ fun main() {
     }
 
     println("Part 1: ${hits.maxOf { it }}")
+    println("Part 2: ${hits.count()}")
 }
