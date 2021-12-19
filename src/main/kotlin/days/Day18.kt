@@ -55,6 +55,7 @@ fun main() {
     val input = readInput().map { it.parseSFNumber() }
 
     println("Part 1: ${input.reduce { acc, e -> acc + e }.magnitude }")
+    println("Part 2: ${input.flatMap { left -> input.map { right -> left to right } }.maxOf { (left, right) -> (left + right).magnitude }}")
 }
 
 private data class BinaryTreePath(val decisions: List<Decision>): List<BinaryTreePath.Decision> by decisions {
