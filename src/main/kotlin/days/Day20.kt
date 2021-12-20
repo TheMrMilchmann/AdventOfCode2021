@@ -59,4 +59,5 @@ fun main() {
     }
 
     println("Part 1: ${images.drop(2).first().grid.count { it }}")
+    println("Part 2: ${images.drop(50).first().grid.count { it }}")
 }
