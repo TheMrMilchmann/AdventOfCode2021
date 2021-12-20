@@ -100,7 +100,7 @@ class Grid<E>(
     private val grid: List<E>,
     val width: Int,
     val height: Int
-) {
+) : Iterable<E> {
 
     init {
         require(grid.size == width * height)
@@ -132,6 +132,9 @@ class Grid<E>(
         return grid[y.intValue * width + x.intValue]
     }
 
+    fun getOrDefault(x: HPos, y: VPos, default: E): E =
+        if (x in horizontalIndices && y in verticalIndices) this[x, y] else default
+
     fun getAdjacentPositions(pos: GridPos, includeDiagonals: Boolean = false): List<GridPos> = buildList {
         pos.copy(x = pos.x - 1).also { if (it in this@Grid) add(it) }
         pos.copy(x = pos.x + 1).also { if (it in this@Grid) add(it) }
@@ -146,7 +149,13 @@ class Grid<E>(
         }
     }
 
+    override fun iterator(): Iterator<E> =
+        grid.iterator()
+
     override fun toString(): String =
         grid.chunked(width).joinToString(separator = System.lineSeparator()) { it.joinToString(separator = "") }
+
+    fun toString(transform: (E) -> String): String =
+        grid.chunked(width).joinToString(separator = System.lineSeparator()) { it.joinToString(separator = "") { transform(it) } }
 
 }
