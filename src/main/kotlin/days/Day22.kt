@@ -68,17 +68,36 @@ fun main() {
         }
     }
 
-    fun part1(): Long =
-        (0 until xs.size - 1).flatMap { x ->
-            (0 until ys.size - 1).flatMap { y ->
-                (0 until zs.size - 1).map { z ->
+    fun part1(): Long {
+        var res = 0L
+
+        for (x in 0 until xs.size - 1) {
+            for (y in 0 until ys.size - 1) {
+                for (z in 0 until zs.size - 1) {
                     if (box[x][y][z] && -50 <= xs[x] && xs[x] <= 50 && -50 <= ys[y] && ys[y] <= 50 && -50 <= zs[z] && zs[z] <= 50)
-                        (xs[x + 1] - xs[x]).toLong() * (ys[y + 1] - ys[y]) * (zs[z + 1] - zs[z])
-                    else
-                        0L
+                        res += (xs[x + 1] - xs[x]).toLong() * (ys[y + 1] - ys[y]) * (zs[z + 1] - zs[z])
                 }
             }
-        }.sum()
+        }
+
+        return res
+    }
+
+    fun part2(): Long {
+        var res = 0L
+
+        for (x in 0 until xs.size - 1) {
+            for (y in 0 until ys.size - 1) {
+                for (z in 0 until zs.size - 1) {
+                    if (box[x][y][z])
+                        res += (xs[x + 1] - xs[x]).toLong() * (ys[y + 1] - ys[y]) * (zs[z + 1] - zs[z])
+                }
+            }
+        }
+
+        return res
+    }
 
     println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
