@@ -21,7 +21,7 @@
  */
 package days
 
-import utils.readInput
+import utils.*
 
 fun main() {
     val pattern = """Player (\d+) starting position: (\d+)""".toRegex()

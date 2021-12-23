@@ -21,7 +21,7 @@
  */
 package days
 
-import utils.readInput
+import utils.*
 
 fun main() {
     data class Cuboid(
