@@ -108,6 +108,8 @@ package days
 
 fun main() {
     fun part1() = "99999795919456"
+    fun part2() = "45311191516111"
 
     println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
