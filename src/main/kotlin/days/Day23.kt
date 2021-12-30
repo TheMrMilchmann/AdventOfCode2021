@@ -101,10 +101,11 @@ fun main() {
     }
 
     data class Input(val state: State, val roomSize: Int, val hallway: List<Vec2>)
-    val (state, roomSize, hallway) = readInput().let { lines ->
+
+    fun List<String>.parseInput(): Input =
         Input(
             state = State(
-                amphipods = lines.drop(1).flatMapIndexed { y, line ->
+                amphipods = drop(1).flatMapIndexed { y, line ->
                     line.mapIndexedNotNull { x, c ->
                         val type = when (c) {
                             'A' -> Type.AMBER
@@ -119,16 +120,34 @@ fun main() {
                 }.sortedBy { it.hashCode() },
                 totalCost = 0
             ),
-            roomSize = lines.size - 3,
-            hallway = lines[1].indices
+            roomSize = size - 3,
+            hallway = this[1].indices
                 .drop(0)
-                .take(lines[1].length - 2)
+                .take(this[1].length - 2)
                 .filter { Type.values().none { type -> type.roomX == it } }
                 .map { Vec2(x = it, y = 0) }
         )
+
+    fun part1(): Int {
+        val (state, roomSize, hallway) = readInput().parseInput()
+        return state.calculateCost(roomSize, hallway)
     }
 
-    println("Part 1: ${state.calculateCost(roomSize, hallway)}")
+    fun part2(): Int {
+        val (state, roomSize, hallway) = buildList {
+            val input = readInput()
+            addAll(input.take(input.size - 2))
+
+            add("  #D#C#B#A#")
+            add("  #D#B#A#C#")
+            addAll(input.drop(input.size - 2))
+        }.also { println(it.joinToString(separator = "\n")) }.parseInput()
+
+        return state.calculateCost(roomSize, hallway)
+    }
+
+    println("Part 1: ${part1()}")
+    println("Part 2: ${part2()}")
 }
 
 private enum class Type(val roomX: Int, val cost: Int) {
