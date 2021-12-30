@@ -22,6 +22,7 @@
 package days
 
 import utils.*
+import kotlin.math.*
 
 fun main() {
     data class Vec3(val x: Int, val y: Int, val z: Int) {
@@ -50,6 +51,9 @@ fun main() {
             }
         }
 
+        infix fun distanceTo(other: Vec3) =
+            (x - other.x).absoluteValue + (y - other.y).absoluteValue + (z - other.z).absoluteValue
+
         operator fun minus(other: Vec3) =
             Vec3(x - other.x, y - other.y, z - other.z)
 
@@ -67,14 +71,14 @@ fun main() {
                 .toList()
         }
 
-        fun findMatchingFor(other: Set<Vec3>): Set<Vec3>? {
+        fun findMatchingFor(other: Set<Vec3>): Pair<Vec3, Set<Vec3>>? {
             for (rot in rotations) {
                 for (source in rot) {
                     for (target in other) {
                         val offset = target - source
 
                         if (rot.map { it + offset }.count { it in other } >= 12)
-                            return rot.map { it + offset }.toHashSet()
+                            return offset to rot.map { it + offset }.toSet()
                     }
                 }
             }
@@ -99,19 +103,26 @@ fun main() {
     val input = readInput().parseInput()
 
     var base = input[0].coords.toSet()
-    var scanners = input.drop(1)
+    val scanners = mutableSetOf(Vec3(x = 0, y = 0, z = 0))
 
-    while (scanners.isNotEmpty()) {
-        for (scanner in scanners) {
+    var scannerResults = input.drop(1)
+
+    while (scannerResults.isNotEmpty()) {
+        for (scanner in scannerResults) {
             val matching = scanner.findMatchingFor(base)
 
             if (matching != null) {
-                base = base + matching
-                scanners = (scanners - scanner)
+                val (matchedScanner, matchedBeacons) = matching
+
+                base = base + matchedBeacons
+                scanners += matchedScanner
+
+                scannerResults = (scannerResults - scanner)
                 break
             }
         }
     }
 
-    println("Part 1: ${base.toSet().size}")
+    println("Part 1: ${base.size}")
+    println("Part 2: ${scanners.flatMap { a -> scanners.map { b -> a distanceTo b } }.maxOf { it }}")
 }
