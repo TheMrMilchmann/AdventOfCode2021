@@ -67,14 +67,14 @@ fun main() {
                 .toList()
         }
 
-        fun findMatchingFor(other: List<Vec3>): List<Vec3>? {
+        fun findMatchingFor(other: Set<Vec3>): Set<Vec3>? {
             for (rot in rotations) {
                 for (source in rot) {
                     for (target in other) {
                         val offset = target - source
 
                         if (rot.map { it + offset }.count { it in other } >= 12)
-                            return rot.map { it + offset }
+                            return rot.map { it + offset }.toHashSet()
                     }
                 }
             }
@@ -98,7 +98,7 @@ fun main() {
 
     val input = readInput().parseInput()
 
-    var base = input[0].coords
+    var base = input[0].coords.toSet()
     var scanners = input.drop(1)
 
     while (scanners.isNotEmpty()) {
